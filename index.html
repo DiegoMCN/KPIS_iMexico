@@ -473,9 +473,11 @@ document.querySelectorAll('.ftoggle button').forEach(b=>b.addEventListener('clic
   document.querySelectorAll('.ftoggle button').forEach(x=>x.classList.remove('on'));
   b.classList.add('on');funnelPeriod=b.dataset.p;renderFunnel();
 }));
-/* auto-conexión si viene ?src= (o ?sheet= antiguo) en la URL */
+/* enlace del maestro por defecto (se conecta solo al abrir) */
+const DEFAULT_SHEET="https://docs.google.com/spreadsheets/d/1RjkfLNh09LGQ68X8xGu8q-aFpcNRjVYfHxOvGE9m09U/edit";
+/* auto-conexión: usa ?src= de la URL si viene; si no, el enlace por defecto */
 const params=new URLSearchParams(location.search);
-const saved=params.get('src')||params.get('sheet');
+const saved=params.get('src')||params.get('sheet')||DEFAULT_SHEET;
 if(saved){document.getElementById('sheetUrl').value=saved;connect();}
 renderWeekLabel();
 </script>
