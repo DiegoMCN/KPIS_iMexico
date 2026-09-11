@@ -167,7 +167,11 @@ footer b{color:var(--gold)}
 const KPI_LABELS = ["Llamadas realizadas","Prospectos Brokers Externos","Presentaciones iMexico/Des. a BE","Recorridos con prospectos leads","Apartados realizados"];
 const KPI_SHORT  = ["Llamadas","Prosp. Brokers","Presentaciones","Recorridos","Apartados"];
 const META_ASESOR = [50,25,10,5,0.5];
-const ASESORES = ["Viany Ramirez","Ian Vallejo","Bris Bernal","Nestor Gamez","Eli Miranda","Edgar J Cortes","Eddy Aguilar","Araceli Oneto"];
+const ASESORES = ["Viany Ramirez","Ian Vallejo","Bris Bernal","Nestor Gamez","Eli Miranda","Edgar J Cortes","Eddy Aguilar","Araceli Oneto","Nicole Biesner","Karely Muñoz","Roberto Mendoza","Illeana Zuñiga","Lorena Ramirez","Eugenia Abal","Steffi Cruz"];
+// Personas que ya NO están en el equipo (nunca se muestran, aunque aparezcan en los datos)
+const EXCLUIDOS = ["Alvaro Sansores","Sandra Pulido"];
+// Nombres capturados que deben normalizarse (dato mal escrito -> nombre correcto)
+const ALIAS = {"Bris & Alvaro":"Bris Bernal","Bris Bernal & Alvaro S":"Bris Bernal","Bris & Alvaro S":"Bris Bernal"};
 const STAGE_COLORS = ["#4D6BB3","#1F8FD6","#1BB3A6","#C9A227","#D65445"];
 const SHEET_TAB = "Registro Diario";
 
@@ -292,7 +296,7 @@ function loadRows(rows){
   records=[];
   for(let i=1;i<rows.length;i++){
     const r=rows[i]; if(!r||r.length<3) continue;
-    const d=parseDate(r[0]); const a=(r[1]||'').toString().trim();
+    const d=parseDate(r[0]); let a=(r[1]||'').toString().trim(); a=ALIAS[a]||a;
     if(!d||!a||/ejemplo de captura/i.test(String(r[7]||''))) continue;
     records.push({date:d,asesor:a,v:[num(r[2]),num(r[3]),num(r[4]),num(r[5]),num(r[6])]});
   }
@@ -339,9 +343,12 @@ function sumRange(from,to,asesor){ // [from,to)
   return t;
 }
 function activeAdvisors(){
-  // Solo los asesores de la lista oficial (ASESORES). Se ignora cualquier
-  // nombre que venga en los datos pero que ya no esté en el equipo.
-  return [...ASESORES];
+  // Muestra el roster base + cualquier asesor que aparezca en los datos,
+  // excepto los que ya salieron del equipo (EXCLUIDOS). Así, personas nuevas
+  // aparecen solas al capturar, sin editar el código.
+  const set=new Set(ASESORES);
+  records.forEach(r=>{ if(r.asesor) set.add(r.asesor); });
+  return [...set].filter(a=>!EXCLUIDOS.includes(a));
 }
 
 /* ================= Render ================= */
